@@ -574,6 +574,7 @@
 
   ;; Включение встроенного профилировщика для
   ;; выявления узких мест и дальнейшей оптимизации конфигурации
+  (require 'profiler)
   (profiler-start)
   (profiler-report)
 
@@ -603,11 +604,11 @@
   (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
   (setq reftex-plug-into-AUCTeX t)
   (setq TeX-PDF-mode t)
-  ;; (setq TeX-view-program-selection '((output-pdf "pdf-tools")))
+  (setq TeX-view-program-selection '((output-pdf "pdf-tools")))
   (setq texlive-full t)
 
   ;; Просмоторщик pdf
-  (setq TeX-view-program-selection '((output-pdf "Evince")))
+  ;; (setq TeX-view-program-selection '((output-pdf "Evince")))
   (setq lsp-texlab-executable "texlab")
 
   ;; Настройки преамбулы LaTeX по умолчанию для всех файлов .org
