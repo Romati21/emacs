@@ -19,7 +19,8 @@
 
    ;; Список слоев для загрузки
    dotspacemacs-configuration-layers
-   '(
+   '(yaml
+     javascript
      ;; --- Языки программирования ---
      (python :variables
              python-backend 'lsp
@@ -44,6 +45,9 @@
             latex-enable-recursive-edit t
             latex-view-with-pdf-tools t)
      c-c++
+     ;; (auto-save :variables
+     ;;            auto-save-mode t
+     ;;            auto-save-interval 1)
 
      ;; --- Редактирование ---
      pdf
@@ -62,6 +66,13 @@
      evil-snipe
 
      ;; --- Утилиты ---
+
+     (ranger :variables
+             ranger-show-preview t
+             ranger-show-hidden t
+             ranger-cleanup-eagerly t
+             ranger-cleanup-on-disable t
+             ranger-ignored-extensions '("mkv" "flv" "iso" "mp4"))
      dash
      docker
      systemd
@@ -102,6 +113,16 @@
    ;; Список дополнительных пакетов для установки
    dotspacemacs-additional-packages
    '(
+     (telega)
+     (setq telega-directory "~/.telega"
+           telega-options-plist '(:online t :localization_target "tdesktop" :use_storage_optimizer nil :ignore_file_names nil)
+           telega-proxies nil
+           telega-my-location nil)
+     (add-hook 'telega-load-hook
+               (lambda ()
+                 (define-key global-map (kbd "C-c t") telega-prefix-map)))
+     (setq telega-server-libs-prefix "/opt/tdlib-tg/lib/libtdjson.so")
+
      (ob-async :location built-in)
      (ob-go :location built-in)
      (ob-rust :location built-in)
@@ -574,11 +595,20 @@
 
   ;; Включение встроенного профилировщика для
   ;; выявления узких мест и дальнейшей оптимизации конфигурации
-  (require 'profiler)
-  (profiler-start)
-  (profiler-report)
+  ;; (require 'profiler)
+  ;; (profiler-start)
+  ;; (profiler-report)
 
+  ;; Параметры подключения к Postgres
+  (setq sql-postgres-options '("-h" "localhost" "-p" "5432" "-U" "romancnc" "-d" "vendordatabase"))
+
+
+  ;; (setq telega-server-libs-prefix "/home/roman/td/tdlib/lib")
+  (add-hook 'telega-load-hook
+            (lambda ()
+              (define-key global-map (kbd "C-c t") telega-prefix-map)))
   (setq-default tab-width 4)
+
   ;; Настройки AUCTeX
   (setq TeX-auto-save t)
   (setq TeX-parse-self t)
@@ -643,6 +673,10 @@
   ;; Использовать TexLab в качестве сервера LSP для LaTeX
   (setq lsp-tex-server 'texlab)
 
+  ;; Telega
+  (telega :variables
+          telega-use-docker t)
+
   ;; Включить предварительный просмотр PDF в реальном времени с пакетом TexLab
   (add-hook 'TeX-mode-hook 'lsp)
   (add-hook 'TeX-mode-hook
@@ -688,7 +722,7 @@ This function is called at the very end of Spacemacs initialization."
  '(magit-repository-directories '(("~/" . 2) ("/media/D" . 6)))
  '(org-agenda-files '("/home/roman/org"))
  '(package-selected-packages
-   '(pdf-view-restore pdf-tools add-node-modules-path company-web web-completion-data counsel-css emmet-mode helm-css-scss impatient-mode pug-mode sass-mode haml-mode scss-mode slim-mode tagedit web-mode blacken code-cells company-anaconda anaconda-mode counsel-gtags counsel swiper ivy cython-mode ggtags helm-cscope helm-pydoc importmagic epc ctable concurrent live-py-mode lsp-pyright lsp-python-ms nose pip-requirements pipenv load-env-vars pippel poetry py-isort pydoc pyenv-mode pythonic pylookup pytest pyvenv sphinx-doc stickyfunc-enhance xcscope yapfify magit zeal-at-point yasnippet-snippets ws-butler writeroom-mode wolfram-mode winum which-key web-beautify volatile-highlights vim-powerline vi-tilde-fringe vala-snippets vala-mode uuidgen undo-tree treemacs-projectile treemacs-persp treemacs-magit treemacs-icons-dired treemacs-evil toc-org thrift term-cursor symon symbol-overlay string-inflection string-edit-at-point stan-mode spacemacs-whitespace-cleanup spacemacs-purpose-popwin spaceline space-doc smeargle scad-mode restart-emacs rainbow-delimiters quickrun qml-mode prettier-js popwin pkgbuild-mode pcre2el password-generator paradox pandoc-mode ox-pandoc overseer orgit-forge org-wild-notifier org-superstar org-roam-ui org-rich-yank org-projectile org-present org-pomodoro org-mime org-download org-contrib org-cliplink open-junk-file nameless multi-line matlab-mode macrostep lsp-ui lsp-origami lsp-latex lorem-ipsum logcat link-hint keycast inspector info+ indent-guide hybrid-mode hungry-delete htmlize hoon-mode holy-mode hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt helm-xref helm-themes helm-swoop helm-rtags helm-purpose helm-projectile helm-org-rifle helm-org helm-mode-manager helm-make helm-lsp helm-ls-git helm-git-grep helm-descbinds helm-dash helm-company helm-comint helm-c-yasnippet helm-ag google-translate google-c-style golden-ratio gnuplot gitignore-templates git-timemachine git-modes git-messenger git-link git-commit gendoxy gemini-mode geiser-racket geiser-guile geiser-gambit flycheck-ycmd flycheck-rtags flycheck-pos-tip flycheck-package flycheck-elsa flx-ido fancy-battery eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-textobj-line evil-tex evil-surround evil-snipe evil-org evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-goggles evil-exchange evil-evilified-state evil-escape evil-easymotion evil-collection evil-cleverparens evil-args evil-anzu eval-sexp-fu erc-yt erc-view-log erc-social-graph erc-image erc-hl-nicks emr elisp-slime-nav elisp-def ein editorconfig ebuild-mode dumb-jump drag-stuff dotenv-mode dockerfile-mode docker disaster dired-quick-sort diminish diff-hl devdocs define-word dap-mode cpp-auto-include company-ycmd company-rtags company-reftex company-math company-c-headers company-auctex command-log-mode column-enforce-mode clean-aindent-mode centered-cursor-mode ccls browse-at-remote auto-yasnippet auto-highlight-symbol auto-compile arduino-mode all-the-icons aggressive-indent ace-link ace-jump-helm-line)))
+   '(ejc-sql yaml-mode import-js grizzl js-doc js2-refactor multiple-cursors livid-mode nodejs-repl npm-mode skewer-mode js2-mode tern rainbow-mode visual-fill terminal-focus-reporting rainbow-identifiers telega pdf-view-restore pdf-tools add-node-modules-path company-web web-completion-data counsel-css emmet-mode helm-css-scss impatient-mode pug-mode sass-mode haml-mode scss-mode slim-mode tagedit web-mode blacken code-cells company-anaconda anaconda-mode counsel-gtags counsel swiper ivy cython-mode ggtags helm-cscope helm-pydoc importmagic epc ctable concurrent live-py-mode lsp-pyright lsp-python-ms nose pip-requirements pipenv load-env-vars pippel poetry py-isort pydoc pyenv-mode pythonic pylookup pytest pyvenv sphinx-doc stickyfunc-enhance xcscope yapfify magit zeal-at-point yasnippet-snippets ws-butler writeroom-mode wolfram-mode winum which-key web-beautify volatile-highlights vim-powerline vi-tilde-fringe vala-snippets vala-mode uuidgen undo-tree treemacs-projectile treemacs-persp treemacs-magit treemacs-icons-dired treemacs-evil toc-org thrift term-cursor symon symbol-overlay string-inflection string-edit-at-point stan-mode spacemacs-whitespace-cleanup spacemacs-purpose-popwin spaceline space-doc smeargle scad-mode restart-emacs rainbow-delimiters quickrun qml-mode prettier-js popwin pkgbuild-mode pcre2el password-generator paradox pandoc-mode ox-pandoc overseer orgit-forge org-wild-notifier org-superstar org-roam-ui org-rich-yank org-projectile org-present org-pomodoro org-mime org-download org-contrib org-cliplink open-junk-file nameless multi-line matlab-mode macrostep lsp-ui lsp-origami lsp-latex lorem-ipsum logcat link-hint keycast inspector info+ indent-guide hybrid-mode hungry-delete htmlize hoon-mode holy-mode hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt helm-xref helm-themes helm-swoop helm-rtags helm-purpose helm-projectile helm-org-rifle helm-org helm-mode-manager helm-make helm-lsp helm-ls-git helm-git-grep helm-descbinds helm-dash helm-company helm-comint helm-c-yasnippet helm-ag google-translate google-c-style golden-ratio gnuplot gitignore-templates git-timemachine git-modes git-messenger git-link git-commit gendoxy gemini-mode geiser-racket geiser-guile geiser-gambit flycheck-ycmd flycheck-rtags flycheck-pos-tip flycheck-package flycheck-elsa flx-ido fancy-battery eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-textobj-line evil-tex evil-surround evil-snipe evil-org evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-goggles evil-exchange evil-evilified-state evil-escape evil-easymotion evil-collection evil-cleverparens evil-args evil-anzu eval-sexp-fu erc-yt erc-view-log erc-social-graph erc-image erc-hl-nicks emr elisp-slime-nav elisp-def ein editorconfig ebuild-mode dumb-jump drag-stuff dotenv-mode dockerfile-mode docker disaster dired-quick-sort diminish diff-hl devdocs define-word dap-mode cpp-auto-include company-ycmd company-rtags company-reftex company-math company-c-headers company-auctex command-log-mode column-enforce-mode clean-aindent-mode centered-cursor-mode ccls browse-at-remote auto-yasnippet auto-highlight-symbol auto-compile arduino-mode all-the-icons aggressive-indent ace-link ace-jump-helm-line)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
