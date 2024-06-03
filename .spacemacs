@@ -78,6 +78,8 @@
      systemd
      csv
      html
+     (shell :variables
+            shell-default-shell 'vterm)
      (ipython-notebook :variables ein-backend 'jupyter)
      major-modes
      command-log
@@ -598,6 +600,32 @@
   ;; (require 'profiler)
   ;; (profiler-start)
   ;; (profiler-report)
+
+  ;; Настройка шрифта для vterm
+  (add-hook 'vterm-mode-hook
+            (lambda ()
+              (set-face-attribute 'vterm nil
+                                  :family "Source Code Pro"
+                                  :size 16.0
+                                  :weight normal
+                                  :width normal)))
+
+  ;; Настройка автодополнения для eshell
+  (add-hook 'eshell-mode-hook
+            (lambda ()
+              (define-key eshell-mode-map (kbd "TAB") 'completion-at-point)))
+
+  ;; Включение автодополнения в eshell
+  (with-eval-after-load 'esh-opt
+    (setq eshell-hist-ignoredups t
+          eshell-save-history-on-exit t
+          eshell-history-size 1024
+          eshell-prompt-regexp "^[^#$\n]*[#$] "
+          eshell-prompt-function
+          (lambda ()
+            (concat
+             (abbreviate-file-name (eshell/pwd))
+             (if (= (user-uid) 0) " # " " $ ")))))
 
   ;; Параметры подключения к Postgres
   (setq sql-postgres-options '("-h" "localhost" "-p" "5432" "-U" "romancnc" "-d" "vendordatabase"))
