@@ -34,7 +34,6 @@
      lsp
      dap                   ; Новый отладчик для слоя python
 
-     ;; cl-lib
      elixir
      (scheme :variables scheme-implementations '(gambit guile racket))
      haskell
@@ -330,7 +329,7 @@
    ;; неотрицательное целое число (размер в пикселях) или вещественное число (размер в пунктах).
    ;; Рекомендуется использовать размер в пунктах, так как он не зависит от устройства. (по умолчанию 10.0)
    dotspacemacs-default-font '("Source Code Pro"
-                               :size 24.0
+                               :size 18.0
                                :weight normal
                                :width normal)
 
@@ -607,6 +606,10 @@
   ;; (profiler-start)
   ;; (profiler-report)
 
+  (setq calc-number-format "%.2f")
+  (setq calc-group-digits 3)
+  (setq calc-group-char " ")
+
 
   ;; Настраиваем vterm использовать Zsh
   ;; (setq vterm-shell "/usr/bin/zsh")
@@ -622,11 +625,30 @@ should be set before packages are loaded."
 
   ;; Настройки для экспорта org в PDF
   (with-eval-after-load 'ox-latex
+    ;; Добавляем необходимые пакеты
+    (add-to-list 'org-latex-packages-alist '("" "hyperref" t))
     (add-to-list 'org-latex-packages-alist '("" "minted"))
+    ;; Настраиваем процесс экспорта в PDF
     (setq org-latex-pdf-process
           '("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
             "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
             "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f")))
+  (setq org-latex-with-hyperref t)
+  (setq org-latex-hyperref-template "
+  \\hypersetup{
+    pdfauthor={%a},
+    pdftitle={%t},
+    pdfkeywords={%k},
+    pdfsubject={%d},
+    pdfcreator={Emacs Org-mode},
+    pdflang={%L},
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue
+  }
+  ")
+
+
 
   ;; Оптимизация LSP
   (setq lsp-idle-delay 0.500)
@@ -663,13 +685,6 @@ should be set before packages are loaded."
         TeX-source-correlate-start-server t)
 
 
-  ;; Проблема с экспортом org файлов в PDF
-  (with-eval-after-load 'ox-latex
-    (add-to-list 'org-latex-packages-alist '("" "minted"))
-    (setq org-latex-pdf-process
-          '("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
-            "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
-            "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"  )))
   ;; Настройка шрифта для vterm
   (add-hook 'vterm-mode-hook
             (lambda ()
