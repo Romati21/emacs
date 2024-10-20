@@ -33,6 +33,8 @@
              python-pipenv-activate t)
      lsp
      dap                   ; Новый отладчик для слоя python
+
+     ;; cl-lib
      elixir
      (scheme :variables scheme-implementations '(gambit guile racket))
      haskell
@@ -117,6 +119,7 @@
    ;; Список дополнительных пакетов для установки
    dotspacemacs-additional-packages
    '(
+     ;; (exec-path-from-shell)
      (telega)
      (setq telega-directory "~/.telega"
            telega-options-plist '(:online t :localization_target "tdesktop" :use_storage_optimizer nil :ignore_file_names nil)
@@ -327,7 +330,7 @@
    ;; неотрицательное целое число (размер в пикселях) или вещественное число (размер в пунктах).
    ;; Рекомендуется использовать размер в пунктах, так как он не зависит от устройства. (по умолчанию 10.0)
    dotspacemacs-default-font '("Source Code Pro"
-                               :size 16.0
+                               :size 24.0
                                :weight normal
                                :width normal)
 
@@ -584,6 +587,7 @@
   "Инициализация для пользовательского кода.
 Эта функция вызывается сразу после `dotspacemacs/init', перед конфигурацией слоев.
 Здесь следует размещать переменные, которые должны быть установлены до загрузки пакетов."
+  (setq evil-want-keybinding nil)
   )
 
 
@@ -603,6 +607,69 @@
   ;; (profiler-start)
   ;; (profiler-report)
 
+
+  ;; Настраиваем vterm использовать Zsh
+  ;; (setq vterm-shell "/usr/bin/zsh")
+  ;; (when (memq window-system '(ns x))
+  ;;   (use-package exec-path-from-shell
+  ;;     :config
+  ;;     (exec-path-from-shell-initialize))
+
+  "Configuration for user code.
+This function is called at the very end of Spacemacs startup, after layer
+configuration. Put your configuration code here, except for variables that
+should be set before packages are loaded."
+
+  ;; Настройки для экспорта org в PDF
+  (with-eval-after-load 'ox-latex
+    (add-to-list 'org-latex-packages-alist '("" "minted"))
+    (setq org-latex-pdf-process
+          '("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+            "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+            "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f")))
+
+  ;; Оптимизация LSP
+  (setq lsp-idle-delay 0.500)
+  (setq lsp-log-io nil)
+  (setq lsp-completion-provider :capf)
+  (setq lsp-keep-workspace-alive nil)
+  (setq lsp-enable-symbol-highlighting nil)
+  (setq lsp-enable-on-type-formatting nil)
+  (setq lsp-signature-auto-activate nil)
+  (setq lsp-signature-render-documentation nil)
+  ;; (setq lsp-eldoc-hook nil)
+  (setq lsp-modeline-code-actions-enable nil)
+  (setq lsp-modeline-diagnostics-enable nil)
+  (setq lsp-headerline-breadcrumb-enable nil)
+  (setq lsp-semantic-tokens-enable nil)
+  (setq lsp-enable-folding nil)
+  (setq lsp-enable-imenu nil)
+  (setq lsp-enable-snippet nil)
+  (setq read-process-output-max (* 1024 1024))
+  (setq gc-cons-threshold 100000000)
+
+  ;; Настройки для экспорта LaTeX в PDF
+  (with-eval-after-load 'tex
+    (add-to-list 'TeX-command-list
+                 '("LaTeX" "%`%l%(mode)%' %t"
+                   TeX-run-TeX nil (latex-mode doctex-mode) :help "Run LaTeX")
+                 t)
+    (setq TeX-command-default "LaTeX")
+    (setq TeX-save-query nil)
+    (setq TeX-show-compilation t))
+
+  (setq TeX-view-program-selection '((output-pdf "PDF Tools"))
+        TeX-view-program-list '(("PDF Tools" "TeX-pdf-tools-sync-view"))
+        TeX-source-correlate-start-server t)
+
+
+  ;; Проблема с экспортом org файлов в PDF
+  (with-eval-after-load 'ox-latex
+    (add-to-list 'org-latex-packages-alist '("" "minted"))
+    (setq org-latex-pdf-process
+          '("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+            "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+            "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"  )))
   ;; Настройка шрифта для vterm
   (add-hook 'vterm-mode-hook
             (lambda ()
@@ -728,8 +795,8 @@
   ;; Добавить слои latex и dvipng
   (dotspacemacs/layers '(latex dvipng)))
 
-  ;; Предоставляет функциональность для расширенных шаблонов в режиме Org
-  (require 'org-tempo)
+;; Предоставляет функциональность для расширенных шаблонов в режиме Org
+(require 'org-tempo)
 
 ;; Не писать ничего ниже этого комментария. Здесь Emacs будет автоматически
 ;; генерировать определения пользовательских переменных.
@@ -738,25 +805,82 @@
 This is an auto-generated function, do not modify its content directly, use
 Emacs customize menu instead.
 This function is called at the very end of Spacemacs initialization."
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(calendar-and-diary-frame-parameters
-   '((name . "Calendar")
-     (title . "Calendar")
-     (height . 28)
-     (width . 70)
-     (minibuffer)))
- '(magit-repository-directories '(("~/" . 2) ("/media/D" . 6)))
- '(org-agenda-files '("/home/roman/org"))
- '(package-selected-packages
-   '(company-php ac-php-core company-phpactor drupal-mode geben php-auto-yasnippets php-extras php-mode phpactor composer php-runtime phpunit bmx-mode powershell ejc-sql yaml-mode import-js grizzl js-doc js2-refactor multiple-cursors livid-mode nodejs-repl npm-mode skewer-mode js2-mode tern rainbow-mode visual-fill terminal-focus-reporting rainbow-identifiers telega pdf-view-restore pdf-tools add-node-modules-path company-web web-completion-data counsel-css emmet-mode helm-css-scss impatient-mode pug-mode sass-mode haml-mode scss-mode slim-mode tagedit web-mode blacken code-cells company-anaconda anaconda-mode counsel-gtags counsel swiper ivy cython-mode ggtags helm-cscope helm-pydoc importmagic epc ctable concurrent live-py-mode lsp-pyright lsp-python-ms nose pip-requirements pipenv load-env-vars pippel poetry py-isort pydoc pyenv-mode pythonic pylookup pytest pyvenv sphinx-doc stickyfunc-enhance xcscope yapfify magit zeal-at-point yasnippet-snippets ws-butler writeroom-mode wolfram-mode winum which-key web-beautify volatile-highlights vim-powerline vi-tilde-fringe vala-snippets vala-mode uuidgen undo-tree treemacs-projectile treemacs-persp treemacs-magit treemacs-icons-dired treemacs-evil toc-org thrift term-cursor symon symbol-overlay string-inflection string-edit-at-point stan-mode spacemacs-whitespace-cleanup spacemacs-purpose-popwin spaceline space-doc smeargle scad-mode restart-emacs rainbow-delimiters quickrun qml-mode prettier-js popwin pkgbuild-mode pcre2el password-generator paradox pandoc-mode ox-pandoc overseer orgit-forge org-wild-notifier org-superstar org-roam-ui org-rich-yank org-projectile org-present org-pomodoro org-mime org-download org-contrib org-cliplink open-junk-file nameless multi-line matlab-mode macrostep lsp-ui lsp-origami lsp-latex lorem-ipsum logcat link-hint keycast inspector info+ indent-guide hybrid-mode hungry-delete htmlize hoon-mode holy-mode hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt helm-xref helm-themes helm-swoop helm-rtags helm-purpose helm-projectile helm-org-rifle helm-org helm-mode-manager helm-make helm-lsp helm-ls-git helm-git-grep helm-descbinds helm-dash helm-company helm-comint helm-c-yasnippet helm-ag google-translate google-c-style golden-ratio gnuplot gitignore-templates git-timemachine git-modes git-messenger git-link git-commit gendoxy gemini-mode geiser-racket geiser-guile geiser-gambit flycheck-ycmd flycheck-rtags flycheck-pos-tip flycheck-package flycheck-elsa flx-ido fancy-battery eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-textobj-line evil-tex evil-surround evil-snipe evil-org evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-goggles evil-exchange evil-evilified-state evil-escape evil-easymotion evil-collection evil-cleverparens evil-args evil-anzu eval-sexp-fu erc-yt erc-view-log erc-social-graph erc-image erc-hl-nicks emr elisp-slime-nav elisp-def ein editorconfig ebuild-mode dumb-jump drag-stuff dotenv-mode dockerfile-mode docker disaster dired-quick-sort diminish diff-hl devdocs define-word dap-mode cpp-auto-include company-ycmd company-rtags company-reftex company-math company-c-headers company-auctex command-log-mode column-enforce-mode clean-aindent-mode centered-cursor-mode ccls browse-at-remote auto-yasnippet auto-highlight-symbol auto-compile arduino-mode all-the-icons aggressive-indent ace-link ace-jump-helm-line)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
-)
+  (custom-set-variables
+   ;; custom-set-variables was added by Custom.
+   ;; If you edit it by hand, you could mess it up, so be careful.
+   ;; Your init file should contain only one such instance.
+   ;; If there is more than one, they won't work right.
+   '(calendar-and-diary-frame-parameters
+     '((name . "Calendar") (title . "Calendar") (height . 28) (width . 70)
+       (minibuffer)))
+   '(magit-repository-directories '(("~/" . 2) ("/media/D" . 6)))
+   '(org-agenda-files '("/home/roman/org"))
+   '(package-selected-packages
+     '(ac-php-core ace-jump-helm-line ace-link add-node-modules-path
+                   aggressive-indent all-the-icons anaconda-mode arduino-mode
+                   auto-compile auto-highlight-symbol auto-yasnippet blacken
+                   bmx-mode browse-at-remote ccls centered-cursor-mode
+                   clean-aindent-mode code-cells column-enforce-mode
+                   command-log-mode company-anaconda company-auctex
+                   company-c-headers company-math company-php company-phpactor
+                   company-reftex company-rtags company-web company-ycmd composer
+                   concurrent counsel counsel-css counsel-gtags cpp-auto-include
+                   ctable cython-mode dap-mode define-word devdocs diff-hl
+                   diminish dired-quick-sort disaster docker dockerfile-mode
+                   dotenv-mode drag-stuff drupal-mode dumb-jump ebuild-mode
+                   editorconfig ein ejc-sql elisp-def elisp-slime-nav emmet-mode
+                   emr epc erc-hl-nicks erc-image erc-social-graph erc-view-log
+                   erc-yt eval-sexp-fu evil-anzu evil-args evil-cleverparens
+                   evil-collection evil-easymotion evil-escape
+                   evil-evilified-state evil-exchange evil-goggles
+                   evil-iedit-state evil-indent-plus evil-lion evil-lisp-state
+                   evil-matchit evil-mc evil-nerd-commenter evil-numbers evil-org
+                   evil-snipe evil-surround evil-tex evil-textobj-line evil-tutor
+                   evil-unimpaired evil-visual-mark-mode evil-visualstar
+                   exec-path-from-shell expand-region eyebrowse fancy-battery
+                   flx-ido flycheck-elsa flycheck-package flycheck-pos-tip
+                   flycheck-rtags flycheck-ycmd geben geiser-gambit geiser-guile
+                   geiser-racket gemini-mode gendoxy ggtags git-commit git-link
+                   git-messenger git-modes git-timemachine gitignore-templates
+                   gnuplot golden-ratio google-c-style google-translate grizzl
+                   haml-mode helm-ag helm-c-yasnippet helm-comint helm-company
+                   helm-cscope helm-css-scss helm-dash helm-descbinds
+                   helm-git-grep helm-ls-git helm-lsp helm-make helm-mode-manager
+                   helm-org helm-org-rifle helm-projectile helm-purpose helm-pydoc
+                   helm-rtags helm-swoop helm-themes helm-xref hide-comnt
+                   highlight-indentation highlight-numbers highlight-parentheses
+                   hl-todo holy-mode hoon-mode htmlize hungry-delete hybrid-mode
+                   impatient-mode import-js importmagic indent-guide info+
+                   inspector ivy js-doc js2-mode js2-refactor keycast link-hint
+                   live-py-mode livid-mode load-env-vars logcat lorem-ipsum
+                   lsp-latex lsp-origami lsp-pyright lsp-python-ms lsp-ui
+                   macrostep magit matlab-mode multi-line multiple-cursors
+                   nameless nodejs-repl nose npm-mode open-junk-file org-cliplink
+                   org-contrib org-download org-mime org-pomodoro org-present
+                   org-projectile org-rich-yank org-roam-ui org-superstar
+                   org-wild-notifier orgit-forge overseer ox-pandoc pandoc-mode
+                   paradox password-generator pcre2el pdf-tools pdf-view-restore
+                   php-auto-yasnippets php-extras php-mode php-runtime phpactor
+                   phpunit pip-requirements pipenv pippel pkgbuild-mode poetry
+                   popwin powershell prettier-js pug-mode py-isort pydoc
+                   pyenv-mode pylookup pytest pythonic pyvenv qml-mode quickrun
+                   rainbow-delimiters rainbow-identifiers rainbow-mode
+                   restart-emacs sass-mode scad-mode scss-mode skewer-mode
+                   slim-mode smeargle space-doc spaceline spacemacs-purpose-popwin
+                   spacemacs-whitespace-cleanup sphinx-doc stan-mode
+                   stickyfunc-enhance string-edit-at-point string-inflection
+                   swiper symbol-overlay symon tagedit telega term-cursor
+                   terminal-focus-reporting tern thrift toc-org treemacs-evil
+                   treemacs-icons-dired treemacs-magit treemacs-persp
+                   treemacs-projectile undo-tree uuidgen vala-mode vala-snippets
+                   vi-tilde-fringe vim-powerline visual-fill volatile-highlights
+                   web-beautify web-completion-data web-mode which-key winum
+                   wolfram-mode writeroom-mode ws-butler xcscope yaml-mode yapfify
+                   yasnippet-snippets zeal-at-point)))
+  (custom-set-faces
+   ;; custom-set-faces was added by Custom.
+   ;; If you edit it by hand, you could mess it up, so be careful.
+   ;; Your init file should contain only one such instance.
+   ;; If there is more than one, they won't work right.
+   )
+  )
