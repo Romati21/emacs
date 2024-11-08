@@ -61,6 +61,9 @@
           org-enable-roam-protocol t
           org-enable-roam-support t
           org-enable-roam-ui t
+          org-enable-habit-support t
+          org-enable-journal-support t
+          org-enable-gnuplot-support t
           org-protocol t
           org-enable-notifications t
           org-start-notification-daemon-on-startup t)
@@ -91,6 +94,7 @@
 
      ;; --- Прочее ---
      emacs-lisp
+
      sql
      (git :variables
           ;; открывает статус Магита ( SPC g s) в полнокадровом окне,
@@ -155,7 +159,7 @@
 
 ;; Включить уведомления для org
 (setq alert-default-style 'notifications)
-
+(setq org-roam-directory "~/org/roam/")
 
 (defun dotspacemacs/init ()
   "Инициализация:
@@ -622,6 +626,10 @@
 This function is called at the very end of Spacemacs startup, after layer
 configuration. Put your configuration code here, except for variables that
 should be set before packages are loaded."
+  ;; Разрешаем выполнение Emacs Lisp кодовых блоков в Org mode
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((emacs-lisp . t)))
 
   ;; Настройки для экспорта org в PDF
   (with-eval-after-load 'ox-latex
@@ -634,6 +642,9 @@ should be set before packages are loaded."
             "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
             "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f")))
   (setq org-latex-with-hyperref t)
+  (setq org-confirm-babel-evaluate nil)
+
+
   (setq org-latex-hyperref-template "
   \\hypersetup{
     pdfauthor={%a},
