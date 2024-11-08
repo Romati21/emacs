@@ -19,20 +19,25 @@
 
    ;; Список слоев для загрузки
    dotspacemacs-configuration-layers
-   '(php
+   '(python
+     php
      windows-scripts
      yaml
      javascript
      ;; --- Языки программирования ---
+     blacken
+     pyvenv
+
      (python :variables
              python-backend 'lsp
              python-fill-column 99
-             python-formatter 'yapf
+             python-formatter 'black
              python-format-on-save t
              python-sort-imports-on-save t
              python-pipenv-activate t)
      lsp
      dap                   ; Новый отладчик для слоя python
+
 
      elixir
      (scheme :variables scheme-implementations '(gambit guile racket))
@@ -140,6 +145,7 @@
      (ob-shell :location built-in)
      (ob-sql :location built-in)
      (ob-org :location built-in))
+
 
    ;; Список пакетов, которые не могут быть обновлены.
    dotspacemacs-frozen-packages '()
@@ -614,7 +620,26 @@
   (setq calc-group-digits 3)
   (setq calc-group-char " ")
 
+  (use-package pyvenv
+    :ensure t
+    :config
+    (pyvenv-mode 1))
 
+  ;; Оптимизированная настройка Black для Python в Spacemacs
+
+  ;; Удаляем лишние пробелы перед сохранением
+  (add-hook 'before-save-hook 'delete-trailing-whitespace)
+
+  ;; Настройка Black через blacken-mode
+  (use-package blacken
+    :ensure t
+    :hook (python-mode . blacken-mode)  ;; Автоматически включаем blacken-mode для Python
+    :config
+    (setq blacken-line-length 88)  ;; Задаем длину строки
+    (setq blacken-allow-py36 t))   ;; Разрешаем форматирование в стиле Python 3.6+
+
+
+  (setq dap-auto-configure-mode t)
   ;; Настраиваем vterm использовать Zsh
   ;; (setq vterm-shell "/usr/bin/zsh")
   ;; (when (memq window-system '(ns x))
@@ -814,9 +839,6 @@ should be set before packages are loaded."
 
   ;; Включить автоматический перенос строк в text-mode
   (add-hook 'text-mode-hook 'turn-on-auto-fill)
-
-  ;; Использовать texlab в качестве сервера LSP для LaTeX
-  (setq lsp-tex-server 'texlab)
 
   ;; Добавить слои latex и dvipng
   (dotspacemacs/layers '(latex dvipng)))
