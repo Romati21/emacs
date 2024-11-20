@@ -71,6 +71,7 @@
           org-enable-gnuplot-support t
           org-protocol t
           org-enable-notifications t
+          org-hide-emphasis-markers t
           org-start-notification-daemon-on-startup t)
      pandoc
      graphviz
@@ -526,6 +527,7 @@
    ;; Список имен исполняемых файлов инструментов поиска. Spacemacs использует первый установленный инструмент из списка. Поддерживаемые инструменты - `rg', `ag', `pt', `ack' и `grep'.
    ;; (по умолчанию '("rg" "ag" "pt" "ack" "grep"))
    dotspacemacs-search-tools '("rg" "ag" "pt" "ack" "grep")
+   ;; search-ignore-patterns '("*.log" "*.tmp" ".#*")
 
    ;; Формат спецификации для установки заголовка фрейма.
    ;; %a - сокращенное имя файла, или имя буфера
@@ -616,6 +618,34 @@
   ;; (profiler-start)
   ;; (profiler-report)
 
+  ;; Полностью переопределяем команду для ripgrep
+  (with-eval-after-load 'counsel
+    (setq counsel-rg-base-command
+          '("rg"
+            "--max-columns" "240"
+            "--with-filename"
+            "--no-heading"
+            "--line-number"
+            "--color" "never"
+            "--hidden"
+            "--no-ignore"  ; Добавлена эта опция
+            "--glob" "!.git"  ; Игнорировать .git директорию
+            "%s")))
+
+  ;; Настройка игнорируемых файлов и директорий для projectile
+  (setq projectile-globally-ignored-directories
+        '(".git"
+          ".svn"
+          "node_modules"
+          "dist"
+          "build"))
+
+  (setq projectile-globally-ignored-files
+        '(".DS_Store"
+          "*.pyc"
+          "*.class"
+          "*.log"))
+
   (setq calc-number-format "%.2f")
   (setq calc-group-digits 3)
   (setq calc-group-char " ")
@@ -624,6 +654,18 @@
     :ensure t
     :config
     (pyvenv-mode 1))
+
+  ;; Настройки LSP
+  (use-package lsp-mode
+    :ensure t
+    :config
+    (setq lsp-pylsp-plugins-pylint-enabled t)  ;; Включить Pylint, если требуется
+    (setq lsp-diagnostics-provider :flycheck)) ;; Использовать Flycheck для диагностики
+
+  (use-package flycheck
+    :ensure t
+    :config
+    (global-flycheck-mode))
 
   ;; Оптимизированная настройка Black для Python в Spacemacs
 
@@ -646,6 +688,20 @@
   ;;   (use-package exec-path-from-shell
   ;;     :config
   ;;     (exec-path-from-shell-initialize))
+
+  ;; Использование Treemacs и настройка сортировки
+  (with-eval-after-load 'treemacs
+    ;; Сортировка по времени изменения, от новых к старым
+    (setq treemacs-sorting 'mod-time-desc))
+
+  ;; Если вам захочется изменить сортировку на другой тип, Treemacs поддерживает следующие опции:
+
+  ;; 'alphabetic-asc — по алфавиту от А до Я (по умолчанию).
+  ;; 'alphabetic-desc — по алфавиту от Я до А.
+  ;; 'mod-time-asc — по времени изменения, от старых к новым.
+  ;; 'mod-time-desc — по времени изменения, от новых к старым.
+  ;; 'size-asc — по размеру файла от меньшего к большему.
+  ;; 'size-desc — по размеру файла от большего к меньшему.
 
   "Configuration for user code.
 This function is called at the very end of Spacemacs startup, after layer
@@ -888,13 +944,13 @@ This function is called at the very end of Spacemacs initialization."
                    exec-path-from-shell expand-region eyebrowse fancy-battery
                    flx-ido flycheck-elsa flycheck-package flycheck-pos-tip
                    flycheck-rtags flycheck-ycmd geben geiser-gambit geiser-guile
-                   geiser-racket gemini-mode gendoxy ggtags git-commit git-link
-                   git-messenger git-modes git-timemachine gitignore-templates
-                   gnuplot golden-ratio google-c-style google-translate grizzl
-                   haml-mode helm-ag helm-c-yasnippet helm-comint helm-company
-                   helm-cscope helm-css-scss helm-dash helm-descbinds
-                   helm-git-grep helm-ls-git helm-lsp helm-make helm-mode-manager
-                   helm-org helm-org-rifle helm-projectile helm-purpose helm-pydoc
+                   geiser-racket gemini-mode gendoxy ggtags git-link git-messenger
+                   git-modes git-timemachine gitignore-templates gnuplot
+                   golden-ratio google-c-style google-translate grizzl haml-mode
+                   helm-ag helm-c-yasnippet helm-comint helm-company helm-cscope
+                   helm-css-scss helm-dash helm-descbinds helm-git-grep
+                   helm-ls-git helm-lsp helm-make helm-mode-manager helm-org
+                   helm-org-rifle helm-projectile helm-purpose helm-pydoc
                    helm-rtags helm-swoop helm-themes helm-xref hide-comnt
                    highlight-indentation highlight-numbers highlight-parentheses
                    hl-todo holy-mode hoon-mode htmlize hungry-delete hybrid-mode
