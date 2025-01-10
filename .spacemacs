@@ -24,9 +24,10 @@
      windows-scripts
      yaml
      javascript
+     ;; evil-collection
      ;; --- Языки программирования ---
-     blacken
-     pyvenv
+     ;; blacken
+     ;; pyvenv
 
      (python :variables
              python-backend 'lsp
@@ -128,6 +129,9 @@
    ;; Список дополнительных пакетов для установки
    dotspacemacs-additional-packages
    '(
+     (evil-collection)
+     (blacken)
+     (pyvenv)
      ;; (exec-path-from-shell)
      (telega)
      (setq telega-directory "~/.telega"
@@ -682,12 +686,82 @@
 
 
   (setq dap-auto-configure-mode t)
-  ;; Настраиваем vterm использовать Zsh
-  ;; (setq vterm-shell "/usr/bin/zsh")
-  ;; (when (memq window-system '(ns x))
-  ;;   (use-package exec-path-from-shell
-  ;;     :config
-  ;;     (exec-path-from-shell-initialize))
+
+  (use-package evil-collection
+    :ensure t
+    :config
+    (evil-collection-init))
+
+  ;; Настройка vterm
+  (use-package vterm
+    :ensure t
+    :config
+    ;; Подключаем evil-collection для vterm
+    (with-eval-after-load 'vterm
+      (require 'evil-collection-vterm)
+      (evil-collection-vterm-setup))
+
+    ;; Базовые настройки
+    (setq vterm-environment
+          '(("TERM" . "xterm-256color")
+            ("COLORTERM" . "truecolor")
+            ("INSIDE_EMACS" . "vterm")))
+    (setq vterm-term-environment-variable "xterm-256color"
+          vterm-max-scrollback 10000
+          vterm-buffer-maximum-size 8192
+          vterm-enable-colors t))
+
+  ;; Дополнительные настройки для корректного отображения цветов
+  (add-hook 'vterm-mode-hook
+            (lambda ()
+              ;; Настройка шрифта для vterm
+              (set-face-attribute 'vterm nil
+                                  :family "Source Code Pro"
+                                  :size 16.0
+                                  :weight normal
+                                  :width normal)
+              ;; Устанавливаем переменные окружения
+              (setenv "TERM" "xterm-256color")
+              (setenv "COLORTERM" "truecolor")
+              ;; Включаем поддержку цветов
+              (setq-local term-ansi-color-bold t)
+              (setq-local term-ansi-color-italic t)
+              (setq-local term-ansi-color-bold-is-bright t)
+              ;; Устанавливаем переменные окружения для правильной работы цветов
+              (setq-local term-environment-variable "xterm-256color")
+              ;; Включаем поддержку различных escape-последовательностей
+              (setq-local term-term-name "xterm-256color")))
+
+
+  ;; Настройка цветовой схемы для vterm
+  (with-eval-after-load 'vterm
+    (set-face-attribute 'vterm-color-black nil
+                        :foreground "#000000"
+                        :background "#000000")
+    (set-face-attribute 'vterm-color-red nil
+                        :foreground "#ff0000"
+                        :background "#ff0000")
+    (set-face-attribute 'vterm-color-green nil
+                        :foreground "#00ff00"
+                        :background "#00ff00")
+    (set-face-attribute 'vterm-color-yellow nil
+                        :foreground "#ffff00"
+                        :background "#ffff00")
+    (set-face-attribute 'vterm-color-blue nil
+                        :foreground "#0000ff"
+                        :background "#0000ff")
+    (set-face-attribute 'vterm-color-magenta nil
+                        :foreground "#ff00ff"
+                        :background "#ff00ff")
+    (set-face-attribute 'vterm-color-cyan nil
+                        :foreground "#00ffff"
+                        :background "#00ffff")
+    (set-face-attribute 'vterm-color-white nil
+                        :foreground "#ffffff"
+                        :background "#ffffff"))
+
+  ;; Если используете zsh, можно добавить
+  (setq vterm-shell "/usr/bin/zsh")
 
   ;; Использование Treemacs и настройка сортировки
   (with-eval-after-load 'treemacs
@@ -777,14 +851,6 @@ should be set before packages are loaded."
         TeX-source-correlate-start-server t)
 
 
-  ;; Настройка шрифта для vterm
-  (add-hook 'vterm-mode-hook
-            (lambda ()
-              (set-face-attribute 'vterm nil
-                                  :family "Source Code Pro"
-                                  :size 16.0
-                                  :weight normal
-                                  :width normal)))
 
   ;; Настройка автодополнения для eshell
   (add-hook 'eshell-mode-hook
@@ -964,23 +1030,23 @@ This function is called at the very end of Spacemacs initialization."
                    org-projectile org-rich-yank org-roam-ui org-superstar
                    org-wild-notifier orgit-forge overseer ox-pandoc pandoc-mode
                    paradox password-generator pcre2el pdf-tools pdf-view-restore
-                   php-auto-yasnippets php-extras php-mode php-runtime phpactor
-                   phpunit pip-requirements pipenv pippel pkgbuild-mode poetry
-                   popwin powershell prettier-js pug-mode py-isort pydoc
-                   pyenv-mode pylookup pytest pythonic pyvenv qml-mode quickrun
-                   rainbow-delimiters rainbow-identifiers rainbow-mode
-                   restart-emacs sass-mode scad-mode scss-mode skewer-mode
-                   slim-mode smeargle space-doc spaceline spacemacs-purpose-popwin
-                   spacemacs-whitespace-cleanup sphinx-doc stan-mode
-                   stickyfunc-enhance string-edit-at-point string-inflection
-                   swiper symbol-overlay symon tagedit telega term-cursor
-                   terminal-focus-reporting tern thrift toc-org treemacs-evil
-                   treemacs-icons-dired treemacs-magit treemacs-persp
-                   treemacs-projectile undo-tree uuidgen vala-mode vala-snippets
-                   vi-tilde-fringe vim-powerline visual-fill volatile-highlights
-                   web-beautify web-completion-data web-mode which-key winum
-                   wolfram-mode writeroom-mode ws-butler xcscope yaml-mode yapfify
-                   yasnippet-snippets zeal-at-point)))
+                   php-auto-yasnippets php-extras php-mode php-refactor-mode
+                   php-runtime phpactor phpunit pip-requirements pipenv pippel
+                   pkgbuild-mode poetry popwin powershell prettier-js pug-mode
+                   py-isort pydoc pyenv-mode pylookup pytest pythonic pyvenv
+                   qml-mode quickrun rainbow-delimiters rainbow-identifiers
+                   rainbow-mode restart-emacs sass-mode scad-mode scss-mode
+                   skewer-mode slim-mode smeargle space-doc spaceline
+                   spacemacs-purpose-popwin spacemacs-whitespace-cleanup
+                   sphinx-doc stan-mode stickyfunc-enhance string-edit-at-point
+                   string-inflection swiper symbol-overlay symon tagedit telega
+                   term-cursor terminal-focus-reporting tern thrift toc-org
+                   treemacs-evil treemacs-icons-dired treemacs-magit
+                   treemacs-persp treemacs-projectile undo-tree uuidgen vala-mode
+                   vala-snippets vi-tilde-fringe vim-powerline visual-fill
+                   volatile-highlights web-beautify web-completion-data web-mode
+                   which-key winum wolfram-mode writeroom-mode ws-butler xcscope
+                   yaml-mode yapfify yasnippet-snippets zeal-at-point)))
   (custom-set-faces
    ;; custom-set-faces was added by Custom.
    ;; If you edit it by hand, you could mess it up, so be careful.
