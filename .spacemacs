@@ -659,6 +659,7 @@
     :config
     (pyvenv-mode 1))
 
+
   ;; Настройки LSP
   (use-package lsp-mode
     :ensure t
@@ -1030,14 +1031,14 @@ This function is called at the very end of Spacemacs initialization."
                    org-projectile org-rich-yank org-roam-ui org-superstar
                    org-wild-notifier orgit-forge overseer ox-pandoc pandoc-mode
                    paradox password-generator pcre2el pdf-tools pdf-view-restore
-                   php-auto-yasnippets php-extras php-mode php-refactor-mode
-                   php-runtime phpactor phpunit pip-requirements pipenv pippel
-                   pkgbuild-mode poetry popwin powershell prettier-js pug-mode
-                   py-isort pydoc pyenv-mode pylookup pytest pythonic pyvenv
-                   qml-mode quickrun rainbow-delimiters rainbow-identifiers
-                   rainbow-mode restart-emacs sass-mode scad-mode scss-mode
-                   skewer-mode slim-mode smeargle space-doc spaceline
-                   spacemacs-purpose-popwin spacemacs-whitespace-cleanup
+                   pgmacs php-auto-yasnippets php-extras php-mode
+                   php-refactor-mode php-runtime phpactor phpunit pip-requirements
+                   pipenv pippel pkgbuild-mode poetry popwin powershell
+                   prettier-js pug-mode py-isort pydoc pyenv-mode pylookup pytest
+                   pythonic pyvenv qml-mode quickrun rainbow-delimiters
+                   rainbow-identifiers rainbow-mode restart-emacs sass-mode
+                   scad-mode scss-mode skewer-mode slim-mode smeargle space-doc
+                   spaceline spacemacs-purpose-popwin spacemacs-whitespace-cleanup
                    sphinx-doc stan-mode stickyfunc-enhance string-edit-at-point
                    string-inflection swiper symbol-overlay symon tagedit telega
                    term-cursor terminal-focus-reporting tern thrift toc-org
