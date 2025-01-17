@@ -28,6 +28,8 @@
      ;; --- Языки программирования ---
      ;; blacken
      ;; pyvenv
+     (ivy :variables
+          ivy-enable-advanced-buffer-information nil)
 
      (python :variables
              python-backend 'lsp
@@ -632,8 +634,8 @@
             "--line-number"
             "--color" "never"
             "--hidden"
-            "--no-ignore"  ; Добавлена эта опция
             "--glob" "!.git"  ; Игнорировать .git директорию
+            "--glob" "!.#*"   ; Игнорировать временные файлы с префиксом .#
             "%s")))
 
   ;; Настройка игнорируемых файлов и директорий для projectile
