@@ -649,6 +649,21 @@
           "dist"
           "build"))
 
+  ;; Настройка виртуального окружения
+  (setq python-shell-virtualenv-root "/home/roman/venv_dev")
+
+  (setq ivy-ignore-buffers
+        '("\\` "  ;; игнорировать скрытые буферы
+          "\\`\\*tramp/"  ;; игнорировать TRAMP
+          ;; "\\`\\*Messages\\*"
+          ;; "\\`\\*Help\\*"
+          ))
+
+  (setq ivy-use-virtual-buffers nil)
+
+  (setq tramp-ssh-controlmaster-options
+        "-o ControlMaster=auto -o ControlPath='~/.ssh/ssh-%%r@%%h:%%p' -o ControlPersist=no")
+
   (setq projectile-globally-ignored-files
         '(".DS_Store"
           "*.pyc"
@@ -662,7 +677,11 @@
   (use-package pyvenv
     :ensure t
     :config
-    (pyvenv-mode 1))
+    ;; Включаем pyvenv-mode для управления виртуальными окружениями
+    (pyvenv-mode 1)
+    ;; Переключение окружений вручную
+    (global-set-key (kbd "C-c v a") 'pyvenv-activate)
+    (global-set-key (kbd "C-c v d") 'pyvenv-deactivate))
 
 
   ;; Настройки LSP
@@ -697,6 +716,9 @@
     :ensure t
     :config
     (evil-collection-init))
+
+  (use-package ob-sql-mode
+    :ensure t)
 
   ;; Настройка vterm
   (use-package vterm
@@ -790,7 +812,10 @@ should be set before packages are loaded."
   ;; Разрешаем выполнение Emacs Lisp кодовых блоков в Org mode
   (org-babel-do-load-languages
    'org-babel-load-languages
-   '((emacs-lisp . t)))
+   '((emacs-lisp . t)
+     (sql . t)
+     (python . t)))  ; добавляем поддержку Python
+
 
   ;; Настройки для экспорта org в PDF
   (with-eval-after-load 'ox-latex
@@ -876,7 +901,41 @@ should be set before packages are loaded."
              (if (= (user-uid) 0) " # " " $ ")))))
 
   ;; Параметры подключения к Postgres
-  (setq sql-postgres-options '("-h" "localhost" "-p" "5432" "-U" "romancnc" "-d" "vendordatabase"))
+  (setq my-postgres-connections
+        '(("dev" . ((sql-user . "qr_code_inventory_user")
+                    (sql-database . "qr_code_inventory_db_test")
+                    (sql-server . "192.168.122.192")
+                    (sql-port . "5432")))
+          ("unit" . ((sql-user . "qr_code_inventory_user")
+                     (sql-database . "qr_code_inventory_db_unit")
+                     (sql-server . "192.168.122.192")
+                     (sql-port . 5432)))
+          ("fanuc" . ((sql-user . "user_cnc")
+                      (sql-database . "fanuc_primary_base")
+                      (sql-server . "192.168.0.215")
+                      (sql-port . "5432")))
+          ("prod" . ((sql-user . "qr_code_inventory_user")
+                     (sql-database . "qr_code_inventory_db")
+                     (sql-server . "192.168.122.192")
+                     (sql-port . "5432")))))
+
+  (defun my-sql-connect (name)
+    "Подключение к базе PostgreSQL по имени профиля."
+    (interactive
+     (list (completing-read "Выберите подключение: "
+                            (mapcar #'car my-postgres-connections))))
+    (let* ((conn (assoc name my-postgres-connections))
+           (params (cdr conn)))
+      (if conn
+          (let ((sql-connection-alist
+                 `((,name
+                    (sql-product 'postgres)
+                    (sql-user ,(alist-get 'sql-user params))
+                    (sql-database ,(alist-get 'sql-database params))
+                    (sql-server ,(alist-get 'sql-server params))
+                    (sql-port ,(string-to-number (alist-get 'sql-port params)))))))
+            (sql-connect name))
+        (message "Профиль подключения '%s' не найден" name))))
 
 
   ;; (setq telega-server-libs-prefix "/home/roman/td/tdlib/lib")
@@ -1031,28 +1090,29 @@ This function is called at the very end of Spacemacs initialization."
                    live-py-mode livid-mode load-env-vars logcat lorem-ipsum
                    lsp-latex lsp-origami lsp-pyright lsp-python-ms lsp-ui
                    macrostep magit matlab-mode multi-line multiple-cursors
-                   nameless nodejs-repl nose npm-mode open-junk-file org-cliplink
-                   org-contrib org-download org-mime org-pomodoro org-present
-                   org-projectile org-rich-yank org-roam-ui org-superstar
-                   org-wild-notifier orgit-forge overseer ox-pandoc pandoc-mode
-                   paradox password-generator pcre2el pdf-tools pdf-view-restore
-                   pgmacs php-auto-yasnippets php-extras php-mode
-                   php-refactor-mode php-runtime phpactor phpunit pip-requirements
-                   pipenv pippel pkgbuild-mode poetry popwin powershell
-                   prettier-js pug-mode py-isort pydoc pyenv-mode pylookup pytest
-                   pythonic pyvenv qml-mode quickrun rainbow-delimiters
-                   rainbow-identifiers rainbow-mode restart-emacs sass-mode
-                   scad-mode scss-mode skewer-mode slim-mode smeargle space-doc
-                   spaceline spacemacs-purpose-popwin spacemacs-whitespace-cleanup
-                   sphinx-doc stan-mode stickyfunc-enhance string-edit-at-point
-                   string-inflection swiper symbol-overlay symon tagedit telega
-                   term-cursor terminal-focus-reporting tern thrift toc-org
-                   treemacs-evil treemacs-icons-dired treemacs-magit
-                   treemacs-persp treemacs-projectile undo-tree uuidgen vala-mode
-                   vala-snippets vi-tilde-fringe vim-powerline visual-fill
-                   volatile-highlights web-beautify web-completion-data web-mode
-                   which-key winum wolfram-mode writeroom-mode ws-butler xcscope
-                   yaml-mode yapfify yasnippet-snippets zeal-at-point)))
+                   nameless nodejs-repl nose npm-mode ob-sql ob-sql-mode
+                   open-junk-file org-cliplink org-contrib org-download org-mime
+                   org-pomodoro org-present org-projectile org-rich-yank
+                   org-roam-ui org-superstar org-wild-notifier orgit-forge
+                   overseer ox-pandoc pandoc-mode paradox password-generator
+                   pcre2el pdf-tools pdf-view-restore pgmacs php-auto-yasnippets
+                   php-extras php-mode php-refactor-mode php-runtime phpactor
+                   phpunit pip-requirements pipenv pippel pkgbuild-mode poetry
+                   popwin powershell prettier-js pug-mode py-isort pydoc
+                   pyenv-mode pylookup pytest pythonic pyvenv qml-mode quickrun
+                   rainbow-delimiters rainbow-identifiers rainbow-mode
+                   restart-emacs sass-mode scad-mode scss-mode skewer-mode
+                   slim-mode smeargle space-doc spaceline spacemacs-purpose-popwin
+                   spacemacs-whitespace-cleanup sphinx-doc stan-mode
+                   stickyfunc-enhance string-edit-at-point string-inflection
+                   swiper symbol-overlay symon tagedit telega term-cursor
+                   terminal-focus-reporting tern thrift toc-org treemacs-evil
+                   treemacs-icons-dired treemacs-magit treemacs-persp
+                   treemacs-projectile undo-tree uuidgen vala-mode vala-snippets
+                   vi-tilde-fringe vim-powerline visual-fill volatile-highlights
+                   web-beautify web-completion-data web-mode which-key winum
+                   wolfram-mode writeroom-mode ws-butler xcscope yaml-mode yapfify
+                   yasnippet-snippets zeal-at-point)))
   (custom-set-faces
    ;; custom-set-faces was added by Custom.
    ;; If you edit it by hand, you could mess it up, so be careful.
